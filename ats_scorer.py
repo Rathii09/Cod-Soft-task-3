@@ -15,10 +15,22 @@ SECTION_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     "projects": ("projects", "portfolio"),
 }
 
-POINTS_PER_SECTION = 8
-MAX_KEYWORDS_FOR_FULL_SCORE = 8
+POINTS_PER_SECTION = 8  # 5 sections × 8 points = 40 max section score.
+MAX_KEYWORDS_FOR_FULL_SCORE = 8  # 8 keywords map to the 40-point max keyword score.
 MAX_KEYWORD_SCORE = 40
 MIN_KEYWORDS_FOR_FEEDBACK = 4
+SECTION_COUNT = len(SECTION_KEYWORDS)
+MAX_SECTION_SCORE = POINTS_PER_SECTION * SECTION_COUNT
+FULL_LENGTH_SCORE = 20
+PARTIAL_LENGTH_SCORE = 10
+TARGET_MIN_WORDS = 200
+TARGET_MAX_WORDS = 900
+SOFT_MIN_WORDS = 150
+SOFT_MAX_WORDS = 1200
+TOTAL_MAX_SCORE = MAX_SECTION_SCORE + MAX_KEYWORD_SCORE + FULL_LENGTH_SCORE
+
+if TOTAL_MAX_SCORE != 100:
+    raise ValueError("Scoring constants must sum to 100. Update component maxima.")
 
 SKILL_KEYWORDS: Tuple[str, ...] = (
     "python",
@@ -100,10 +112,10 @@ def score_keywords(text: str) -> Tuple[int, List[str]]:
 
 def score_length(word_count: int) -> Tuple[int, str]:
     """Return the length score and an optional feedback message for CV length."""
-    if 200 <= word_count <= 900:
-        return 20, ""
-    if 150 <= word_count <= 1200:
-        return 10, "Aim for 200-900 words for a concise one-page CV."
+    if TARGET_MIN_WORDS <= word_count <= TARGET_MAX_WORDS:
+        return FULL_LENGTH_SCORE, ""
+    if SOFT_MIN_WORDS <= word_count <= SOFT_MAX_WORDS:
+        return PARTIAL_LENGTH_SCORE, "Aim for 200-900 words for a concise one-page CV."
     return 0, "CV length is far from typical one-page ranges (200-900 words)."
 
 
@@ -125,7 +137,7 @@ def score_cv(text: str) -> ATSScore:
     if length_feedback:
         feedback.append(length_feedback)
 
-    total_score = min(section_score + keyword_score + length_score, 100)
+    total_score = min(section_score + keyword_score + length_score, TOTAL_MAX_SCORE)
 
     return {
         "score": total_score,
@@ -166,6 +178,8 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
+    if args.text is None and args.file is None:
+        raise ValueError("Provide CV text with --text or a file with --file.")
     cv_text = args.text if args.text is not None else read_text_from_file(args.file)
     results = score_cv(cv_text)
     print(json.dumps(results, indent=2))
