@@ -122,8 +122,15 @@ def score_length(word_count: int) -> Tuple[int, str]:
     if TARGET_MIN_WORDS <= word_count <= TARGET_MAX_WORDS:
         return FULL_LENGTH_SCORE, ""
     if SOFT_MIN_WORDS <= word_count <= SOFT_MAX_WORDS:
-        return PARTIAL_LENGTH_SCORE, "Aim for 200-900 words for a concise one-page CV."
-    return 0, "CV length is far from typical one-page ranges (200-900 words)."
+        return (
+            PARTIAL_LENGTH_SCORE,
+            f"Aim for {TARGET_MIN_WORDS}-{TARGET_MAX_WORDS} words for a concise one-page CV.",
+        )
+    return (
+        0,
+        f"CV length is far from typical one-page ranges "
+        f"({TARGET_MIN_WORDS}-{TARGET_MAX_WORDS} words).",
+    )
 
 
 def score_cv(text: str) -> ATSScore:
