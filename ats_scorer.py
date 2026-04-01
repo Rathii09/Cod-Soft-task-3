@@ -15,11 +15,11 @@ SECTION_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     "projects": ("projects", "portfolio"),
 }
 
+SECTION_COUNT = len(SECTION_KEYWORDS)
 POINTS_PER_FOUND_SECTION = 8  # SECTION_COUNT × POINTS_PER_FOUND_SECTION = MAX_SECTION_SCORE.
 MAX_KEYWORDS_FOR_FULL_SCORE = 8  # This threshold maps to MAX_KEYWORD_SCORE.
 MAX_KEYWORD_SCORE = 40
 MIN_KEYWORDS_FOR_FEEDBACK = 4
-SECTION_COUNT = len(SECTION_KEYWORDS)
 MAX_SECTION_SCORE = POINTS_PER_FOUND_SECTION * SECTION_COUNT
 FULL_LENGTH_SCORE = 20
 PARTIAL_LENGTH_SCORE = 10
@@ -152,7 +152,7 @@ def score_cv(text: str) -> ATSScore:
     if length_feedback:
         feedback.append(length_feedback)
 
-    total_score = min(section_score + keyword_score + length_score, TOTAL_MAX_SCORE)
+    total_score = section_score + keyword_score + length_score
 
     return {
         "score": total_score,
