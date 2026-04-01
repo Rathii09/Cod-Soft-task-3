@@ -15,8 +15,8 @@ SECTION_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     "projects": ("projects", "portfolio"),
 }
 
-POINTS_PER_SECTION = 8  # 5 sections × 8 points = 40 max section score.
-MAX_KEYWORDS_FOR_FULL_SCORE = 8  # 8 keywords map to the 40-point max keyword score.
+POINTS_PER_SECTION = 8  # SECTION_COUNT × POINTS_PER_SECTION = MAX_SECTION_SCORE.
+MAX_KEYWORDS_FOR_FULL_SCORE = 8  # This threshold maps to MAX_KEYWORD_SCORE.
 MAX_KEYWORD_SCORE = 40
 MIN_KEYWORDS_FOR_FEEDBACK = 4
 SECTION_COUNT = len(SECTION_KEYWORDS)
