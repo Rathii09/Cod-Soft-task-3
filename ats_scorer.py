@@ -15,6 +15,10 @@ SECTION_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     "projects": ("projects", "portfolio"),
 }
 
+POINTS_PER_SECTION = 8
+MAX_KEYWORDS_FOR_FULL_SCORE = 8
+MAX_KEYWORD_SCORE = 40
+
 SKILL_KEYWORDS: Tuple[str, ...] = (
     "python",
     "java",
@@ -65,14 +69,19 @@ def score_sections(text: str) -> Tuple[int, List[str], List[str]]:
         else:
             missing_sections.append(section)
 
-    section_score = len(found_sections) * 8
+    section_score = len(found_sections) * POINTS_PER_SECTION
     return section_score, found_sections, missing_sections
 
 
 def score_keywords(text: str) -> Tuple[int, List[str]]:
     found_keywords = find_keywords(text, SKILL_KEYWORDS)
-    max_keywords = 8
-    keyword_score = int(round(min(len(found_keywords), max_keywords) / max_keywords * 40))
+    keyword_score = int(
+        round(
+            min(len(found_keywords), MAX_KEYWORDS_FOR_FULL_SCORE)
+            / MAX_KEYWORDS_FOR_FULL_SCORE
+            * MAX_KEYWORD_SCORE
+        )
+    )
     return keyword_score, found_keywords
 
 
