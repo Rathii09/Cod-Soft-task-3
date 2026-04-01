@@ -18,6 +18,7 @@ SECTION_KEYWORDS: Dict[str, Tuple[str, ...]] = {
 POINTS_PER_SECTION = 8
 MAX_KEYWORDS_FOR_FULL_SCORE = 8
 MAX_KEYWORD_SCORE = 40
+MIN_KEYWORDS_FOR_FEEDBACK = 4
 
 SKILL_KEYWORDS: Tuple[str, ...] = (
     "python",
@@ -106,7 +107,7 @@ def score_cv(text: str) -> Dict[str, object]:
     feedback: List[str] = []
     if sections_missing:
         feedback.append(f"Add missing sections: {', '.join(sections_missing)}.")
-    if len(keywords_found) < 4:
+    if len(keywords_found) < MIN_KEYWORDS_FOR_FEEDBACK:
         feedback.append("Highlight more role-relevant skills to improve keyword coverage.")
     if length_feedback:
         feedback.append(length_feedback)
@@ -152,7 +153,10 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
-    cv_text = args.text if args.text is not None else read_text_from_file(args.file)
+    if args.text is not None:
+        cv_text = args.text
+    else:
+        cv_text = read_text_from_file(args.file)
     results = score_cv(cv_text)
     print(json.dumps(results, indent=2))
 
