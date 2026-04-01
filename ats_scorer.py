@@ -15,12 +15,12 @@ SECTION_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     "projects": ("projects", "portfolio"),
 }
 
-POINTS_PER_SECTION = 8  # SECTION_COUNT × POINTS_PER_SECTION = MAX_SECTION_SCORE.
+POINTS_PER_FOUND_SECTION = 8  # SECTION_COUNT × POINTS_PER_FOUND_SECTION = MAX_SECTION_SCORE.
 MAX_KEYWORDS_FOR_FULL_SCORE = 8  # This threshold maps to MAX_KEYWORD_SCORE.
 MAX_KEYWORD_SCORE = 40
 MIN_KEYWORDS_FOR_FEEDBACK = 4
 SECTION_COUNT = len(SECTION_KEYWORDS)
-MAX_SECTION_SCORE = POINTS_PER_SECTION * SECTION_COUNT
+MAX_SECTION_SCORE = POINTS_PER_FOUND_SECTION * SECTION_COUNT
 FULL_LENGTH_SCORE = 20
 PARTIAL_LENGTH_SCORE = 10
 TARGET_MIN_WORDS = 200
@@ -30,7 +30,10 @@ SOFT_MAX_WORDS = 1200
 TOTAL_MAX_SCORE = MAX_SECTION_SCORE + MAX_KEYWORD_SCORE + FULL_LENGTH_SCORE
 
 if TOTAL_MAX_SCORE != 100:
-    raise ValueError("Scoring constants must sum to 100. Update component maxima.")
+    raise ValueError(
+        f"Scoring constants must sum to 100, but got {TOTAL_MAX_SCORE}. "
+        "Update component maxima."
+    )
 
 SKILL_KEYWORDS: Tuple[str, ...] = (
     "python",
@@ -65,6 +68,7 @@ class ATSScore(TypedDict):
 
 
 def normalize_text(text: str) -> str:
+    """Normalize CV text by lowercasing, removing punctuation, and normalizing whitespace."""
     text = text.replace("\u00a0", " ")
     text = text.lower()
     text = text.translate(str.maketrans(string.punctuation, " " * len(string.punctuation)))
@@ -73,6 +77,7 @@ def normalize_text(text: str) -> str:
 
 
 def find_keywords(text: str, keywords: Tuple[str, ...]) -> List[str]:
+    """Return keywords found in text, using phrase matches for multi-word entries."""
     found: List[str] = []
     for keyword in keywords:
         if " " in keyword:
@@ -85,6 +90,7 @@ def find_keywords(text: str, keywords: Tuple[str, ...]) -> List[str]:
 
 
 def score_sections(text: str) -> Tuple[int, List[str], List[str]]:
+    """Score section coverage and return score, found sections, and missing sections."""
     found_sections: List[str] = []
     missing_sections: List[str] = []
 
@@ -94,11 +100,12 @@ def score_sections(text: str) -> Tuple[int, List[str], List[str]]:
         else:
             missing_sections.append(section)
 
-    section_score = len(found_sections) * POINTS_PER_SECTION
+    section_score = len(found_sections) * POINTS_PER_FOUND_SECTION
     return section_score, found_sections, missing_sections
 
 
 def score_keywords(text: str) -> Tuple[int, List[str]]:
+    """Score keyword coverage and return the score with matched keywords."""
     found_keywords = find_keywords(text, SKILL_KEYWORDS)
     keyword_score = int(
         round(
@@ -120,6 +127,7 @@ def score_length(word_count: int) -> Tuple[int, str]:
 
 
 def score_cv(text: str) -> ATSScore:
+    """Compute ATS score from raw CV text and return a structured score summary."""
     cleaned = normalize_text(text)
     if not cleaned:
         raise ValueError("CV text is empty after cleaning.")
@@ -153,6 +161,7 @@ def score_cv(text: str) -> ATSScore:
 
 
 def read_text_from_file(path: str) -> str:
+    """Read CV content from a .txt/.md file after validating the extension."""
     if not os.path.isfile(path):
         raise FileNotFoundError(f"File not found: {path}")
 
