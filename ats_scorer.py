@@ -124,7 +124,7 @@ def score_cv(text: str) -> ATSScore:
     if not cleaned:
         raise ValueError("CV text is empty after cleaning.")
 
-    word_count = len(re.findall(r"\b\w+\b", cleaned))
+    word_count = len(cleaned.split())
     section_score, sections_found, sections_missing = score_sections(cleaned)
     keyword_score, keywords_found = score_keywords(cleaned)
     length_score, length_feedback = score_length(word_count)
@@ -178,8 +178,6 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
-    if args.text is None and args.file is None:
-        raise ValueError("Provide CV text with --text or a file with --file.")
     cv_text = args.text if args.text is not None else read_text_from_file(args.file)
     results = score_cv(cv_text)
     print(json.dumps(results, indent=2))
