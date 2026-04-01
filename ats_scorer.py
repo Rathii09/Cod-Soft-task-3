@@ -99,6 +99,7 @@ def score_keywords(text: str) -> Tuple[int, List[str]]:
 
 
 def score_length(word_count: int) -> Tuple[int, str]:
+    """Return the length score and an optional feedback message for CV length."""
     if 200 <= word_count <= 900:
         return 20, ""
     if 150 <= word_count <= 1200:
@@ -165,10 +166,7 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
-    if args.text is not None:
-        cv_text = args.text
-    else:
-        cv_text = read_text_from_file(args.file)
+    cv_text = args.text if args.text is not None else read_text_from_file(args.file)
     results = score_cv(cv_text)
     print(json.dumps(results, indent=2))
 
