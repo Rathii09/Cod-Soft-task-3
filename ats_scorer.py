@@ -5,7 +5,7 @@ import json
 import os
 import re
 import string
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, TypedDict
 
 SECTION_KEYWORDS: Dict[str, Tuple[str, ...]] = {
     "summary": ("summary", "profile", "objective"),
@@ -38,6 +38,18 @@ SKILL_KEYWORDS: Tuple[str, ...] = (
     "communication",
     "leadership",
 )
+
+
+class ATSScore(TypedDict):
+    score: int
+    section_score: int
+    keyword_score: int
+    length_score: int
+    word_count: int
+    sections_found: List[str]
+    sections_missing: List[str]
+    keywords_found: List[str]
+    feedback: List[str]
 
 
 def normalize_text(text: str) -> str:
@@ -86,15 +98,15 @@ def score_keywords(text: str) -> Tuple[int, List[str]]:
     return keyword_score, found_keywords
 
 
-def score_length(word_count: int) -> Tuple[int, str | None]:
+def score_length(word_count: int) -> Tuple[int, str]:
     if 200 <= word_count <= 900:
-        return 20, None
+        return 20, ""
     if 150 <= word_count <= 1200:
         return 10, "Aim for 200-900 words for a concise one-page CV."
     return 0, "CV length is far from typical one-page ranges (200-900 words)."
 
 
-def score_cv(text: str) -> Dict[str, object]:
+def score_cv(text: str) -> ATSScore:
     cleaned = normalize_text(text)
     if not cleaned:
         raise ValueError("CV text is empty after cleaning.")
